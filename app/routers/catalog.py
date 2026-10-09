@@ -25,6 +25,22 @@ def get_category_products(category_id: int, db: Session = Depends(get_db)):
     return repo.list_productos(db, category_id)
 
 
+@router.get("/products/{product_id}", response_model=ProductOut)
+def get_product(product_id: int, db: Session = Depends(get_db)):
+    producto = repo.get_producto(db, product_id)
+    if producto is None:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    return producto
+
+
+@router.get("/products/{product_id}/presentations", response_model=list[PresentationOut])
+def get_product_presentations(product_id: int, db: Session = Depends(get_db)):
+    producto = repo.get_producto(db, product_id)
+    if producto is None:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    return repo.list_presentaciones_producto(db, producto)
+
+
 @router.get("/presentations", response_model=list[PresentationOut])
 def get_presentations(db: Session = Depends(get_db)):
     return repo.list_presentaciones(db)
