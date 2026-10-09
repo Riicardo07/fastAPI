@@ -1,20 +1,30 @@
-from collections.abc import Generator
+import os
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from dotenv import load_dotenv
+from sqlalchemy import URL, create_engine
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-from app.core.config import settings
+load_dotenv()
 
-engine = create_engine(settings.database_url, pool_pre_ping=True, future=True)
+DATABASE_URL = URL.create(
+    "mysql+pymysql",
+    username=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    host=os.getenv("DB_HOST"),
+    port=int(os.getenv("DB_PORT", "3306")),
+    database=os.getenv("DB_NAME"),
+    query={"charset": "utf8mb4"},
+)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_recycle=3600)
+SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
 
 class Base(DeclarativeBase):
     pass
 
 
-def get_db() -> Generator[Session, None, None]:
+def get_db():
     db = SessionLocal()
     try:
         yield db

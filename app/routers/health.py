@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.core.config import settings
+from app.core.config import allowed_tables_list
 
 router = APIRouter(tags=["core"])
 
@@ -18,5 +18,5 @@ def health() -> dict:
     return {
         "status": "ok",
         "service": "Restaurant API",
-        "assigned_tables": settings.allowed_tables_list,
+        "assigned_tables": allowed_tables_list(),
     }
